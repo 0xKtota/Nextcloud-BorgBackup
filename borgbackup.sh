@@ -39,6 +39,9 @@ export BORG_PASSPHRASE
 export BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK
 export BORG_RELOCATED_REPO_ACCESS_IS_OK
 
+export TELEGRAM_CHAT_ID
+export TELEGRAM_BOT_TOKEN
+
 # Set fileName for Backup-Db
 fileNameBackupDb="${nextcloudDatabase}-db.sql"
 
@@ -186,3 +189,7 @@ durationReadable=$(printf "%02d hours %02d minutes %02d seconds" $durationHour $
 echo -e "\n###### End of the Backup: ${endDateReadable} (${durationReadable}) ######\n"
 echo -e "Disk Usage:\n"
 df -h "${backupDiscMount}"
+
+# Send telegram message
+curl -s -X POST https://api.telegram.org/bot<YourBOTToken>/sendMessage -d chat_id=<YourChatID> -d text="Nextcloud-Backup successful"
+curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" -d chat_id="${TELEGRAM_CHAT_ID}" -d text="Nextcloud-Backup successful Time: ${durationReadable}"
