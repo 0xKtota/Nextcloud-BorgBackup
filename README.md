@@ -72,6 +72,8 @@ Add the following line:
 
 ```
 0 3 * * * /root/borgbackup/backup.sh > /dev/null 2>&1 # This suppresses any output and error messages
+(optional write logs)
+0 3 * * * /root/borgbackup/backup.sh >> /root/borgbackup/backup.log 2>&1
 ```
 
 ### 
