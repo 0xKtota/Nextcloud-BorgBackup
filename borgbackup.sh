@@ -143,7 +143,7 @@ backup_database() {
 
 # Function to create the Borg backup
 create_borg_backup() {
-    echo -e "\nBacking up with BorgBackup\n"
+    echo -e "\nBacking up with BorgBackup\nPaths: ${borgBackupDirs}\n"
     if ! borg create --stats \
         "${borgRepository}::${currentDate}" \
         "${localBackupDir}" \
@@ -192,12 +192,15 @@ durationHour=$((duration / 3600))
 durationReadable=$(printf "%02d hours %02d minutes %02d seconds" $durationHour $durationMin $durationSec)
 
 # Get the disk usage
-dfOutput=$(df -h "${backupDiscMount}")
-echo -e "Disk Usage:\n${dfOutput}"
+dfMainOutput=$(df -h "${nextcloudData}")
+echo -e "Main Disk Usage:\n${dfMainOutput}"
+
+dfBackupOutput=$(df -h "${backupDiscMount}")
+echo -e "Backup Disk Usage:\n${dfBackupOutput}"
 echo -e "\n###### End of the Backup: ${endDateReadable} (${durationReadable}) ######\n"
 
 # Send a detailed message to Telegram with backup information
-telegramMessage="✅*Nextcloud-Backup successfully*%0A%0AStart Time: ${currentDateReadable}%0AEnd Time: ${endDateReadable}%0ADuration: ${durationReadable}%0ADisk Usage:%0A${dfOutput}"
+telegramMessage="✅*Nextcloud-Backup successfully*%0A%0AStart Time: ${currentDateReadable}%0AEnd Time: ${endDateReadable}%0ADuration: ${durationReadable}%0A%0A*Main Disk Usage*%0A${dfMainOutput}%0A*Backup Disk Usage*%0A${dfBackupOutput}"
 # Use the Telegram API to send the message
 curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" -d chat_id="${TELEGRAM_CHAT_ID}" -d text="${telegramMessage}" -d parse_mode="Markdown" > /dev/null 2>&1
 echo -e "Telegram message sent\n"
