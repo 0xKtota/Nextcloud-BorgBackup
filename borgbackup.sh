@@ -200,7 +200,7 @@ echo -e "Backup Disk Usage:\n${dfBackupOutput}"
 echo -e "\n###### End of the Backup: ${endDateReadable} (${durationReadable}) ######\n"
 
 # Send a detailed message to Telegram with backup information
-telegramMessage="✅*Nextcloud-Backup successfully*%0A%0AStart Time: ${currentDateReadable}%0AEnd Time: ${endDateReadable}%0ADuration: ${durationReadable}%0A%0A*Main Disk Usage*%0A${dfMainOutput}%0A*Backup Disk Usage*%0A${dfBackupOutput}"
+telegramMessage="✅*Nextcloud-Backup successfully*%0A%0AStart Time: ${currentDateReadable}%0AEnd Time: ${endDateReadable}%0ADuration: ${durationReadable}%0A%0A💾*Main Disk Usage*%0A${dfMainOutput}%0A💾*Backup Disk Usage*%0A${dfBackupOutput}"
 # Use the Telegram API to send the message
 curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" -d chat_id="${TELEGRAM_CHAT_ID}" -d text="${telegramMessage}" -d parse_mode="Markdown" > /dev/null 2>&1
 echo -e "Telegram message sent\n"
