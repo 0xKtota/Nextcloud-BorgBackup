@@ -111,7 +111,7 @@ borg mount /backup/data::20230707_070011 /restore/
 To unmount the backup:
 
 ```
-borg umount /restore/
+borg umount /restore
 ```
 
 ### 
