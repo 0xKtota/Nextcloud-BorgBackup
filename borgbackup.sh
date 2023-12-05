@@ -14,9 +14,9 @@ handle_error() {
     start_webserver
 
     # Send failure message to Telegram
-    failureMessage="⚠*Error*⚠\nNextcloud-Backup failed on ${currentDateReadable}"
-    curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" -d chat_id="${TELEGRAM_CHAT_ID}" -d text="${failureMessage}"
-
+    failureMessage="⚠*Error*⚠%0ANextcloud-Backup failed on ${currentDateReadable}" # %0A=\n
+    curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" -d chat_id="${TELEGRAM_CHAT_ID}" -d text="${failureMessage}" -d parse_mode="Markdown" > /dev/null 2>&1
+    echo -e "Telegram message sent\n"
     exit 1
 }
 
@@ -135,8 +135,8 @@ start_webserver_after_failure() {
 backup_database() {
     echo "Creating database backup"
     if ! mysqldump --single-transaction --routines -h localhost -u "${dbUser}" -p"${dbPassword}" "${nextcloudDatabase}" > "${localBackupDir}/${fileNameBackupDb}"; then
-        errorecho "Database backup failed."
-        start_webserver_after_failure
+        errorecho "---> Database backup failed <---"
+        handle_error # Call handle_error on failure
         exit 1
     fi
 }
@@ -149,7 +149,7 @@ create_borg_backup() {
         "${localBackupDir}" \
         ${borgBackupDirs}; then 
         errorecho "---> BorgBackup failed <---"
-        start_webserver_after_failure
+        handle_error # Call handle_error on failure
         exit 1
     fi
 }
@@ -191,12 +191,13 @@ durationMin=$(((duration / 60) % 60))
 durationHour=$((duration / 3600))
 durationReadable=$(printf "%02d hours %02d minutes %02d seconds" $durationHour $durationMin $durationSec)
 
-echo -e "\n###### End of the Backup: ${endDateReadable} (${durationReadable}) ######\n"
-echo -e "Disk Usage:\n"
 # Get the disk usage
 dfOutput=$(df -h "${backupDiscMount}")
+echo -e "Disk Usage:\n${dfOutput}"
+echo -e "\n###### End of the Backup: ${endDateReadable} (${durationReadable}) ######\n"
 
 # Send a detailed message to Telegram with backup information
-telegramMessage="*Nextcloud-Backup completed successfully*\nStart Time: ${currentDateReadable}\nEnd Time: ${endDateReadable}\nDuration: ${durationReadable}\nDisk Usage:\n${dfOutput}"
+telegramMessage="✅*Nextcloud-Backup successfully*%0A%0AStart Time: ${currentDateReadable}%0AEnd Time: ${endDateReadable}%0ADuration: ${durationReadable}%0ADisk Usage:%0A${dfOutput}"
 # Use the Telegram API to send the message
-curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" -d chat_id="${TELEGRAM_CHAT_ID}" -d text="${telegramMessage}"
+curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" -d chat_id="${TELEGRAM_CHAT_ID}" -d text="${telegramMessage}" -d parse_mode="Markdown" > /dev/null 2>&1
+echo -e "Telegram message sent\n"
